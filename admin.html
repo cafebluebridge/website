@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HP管理画面</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    background: #f5f6f8;
+    color: #222;
+}
+
+.header {
+    background: #222;
+    color: white;
+    padding: 20px 24px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.subtitle {
+    margin-bottom: 25px;
+    color: #666;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.menu-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    transition: 0.2s;
+}
+
+.menu-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.menu-title {
+    font-size: 19px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.menu-description {
+    color: #777;
+    font-size: 14px;
+}
+
+.editor {
+    display: none;
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin-top: 25px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+.editor h2 {
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    margin-top: 18px;
+    margin-bottom: 7px;
+    font-weight: bold;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    font-size: 16px;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.buttons {
+    margin-top: 25px;
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    border: none;
+    border-radius: 7px;
+    padding: 12px 20px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.save {
+    background: #222;
+    color: white;
+}
+
+.back {
+    background: #e8e8e8;
+    color: #222;
+}
+
+.message {
+    margin-top: 15px;
+    color: #388e3c;
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .menu-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .container {
+        margin-top: 20px;
+    }
+}
+
+.schedule-toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 20px;}
+.schedule-list{display:grid;gap:12px;margin-top:18px;}
+.schedule-item{border:1px solid #e2e5e9;border-radius:10px;padding:16px;background:#fafbfc;}
+.schedule-date{font-size:18px;font-weight:700;margin-bottom:5px;}
+.schedule-place{font-weight:600;margin-bottom:4px;}
+.schedule-meta{color:#666;font-size:14px;line-height:1.7;}
+.schedule-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.small-btn{padding:8px 12px;background:#eee;}
+.primary-btn{background:#222;color:#fff;}
+.danger-btn{background:#fff0f0;color:#b42318;}
+.closed-badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#eee;color:#b42318;font-size:12px;margin-left:7px;}
+.preset-box{margin-top:24px;padding:16px;background:#f5f6f8;border-radius:10px;}
+.preset-list{display:grid;gap:8px;margin-top:10px;}
+.preset-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;background:#fff;border-radius:8px;}
+.preset-name{font-weight:600;}
+@media(max-width:600px){
+  .preset-row{align-items:flex-start;flex-direction:column;}
+  .schedule-actions button{flex:1;}
+}
+
+.ac-cal{background:#fff;border:1px solid #e2e5e9;border-radius:12px;padding:16px;margin:14px 0 20px;}
+.ac-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.ac-cal-head strong{font-size:16px;}
+.ac-cal-nav button{width:34px;height:34px;border-radius:8px;background:#eee;border:none;font-size:16px;cursor:pointer;}
+.ac-cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;}
+.ac-cal-dow{text-align:center;font-size:12px;color:#999;padding:4px 0;}
+.ac-cal-empty{min-height:68px;min-width:0;}
+.ac-day{position:relative;min-height:68px;min-width:0;border:1px solid #eee;border-radius:8px;background:#fff;display:flex;flex-direction:column;align-items:stretch;gap:3px;cursor:pointer;font-size:11px;color:#333;padding:4px;text-align:left;}
+.ac-day.has-event{background:#f5f6f8;border-color:#ccc;}
+.ac-day.is-selected{outline:2px solid #222;outline-offset:-1px;}
+.ac-day-num{font-size:12px;color:#666;text-align:right;}
+.ac-day.is-today .ac-day-num{color:#b42318;font-weight:700;}
+.ac-day-places{display:flex;flex-direction:column;gap:2px;overflow:hidden;min-width:0;}
+.ac-day-place{font-size:10.5px;line-height:1.3;background:#222;color:#fff;border-radius:4px;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+.ac-day.is-closed-day .ac-day-place{background:#b42318;}
+.ac-day-more{font-size:10px;color:#888;padding-left:2px;}
+.ac-day-dots{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:auto;}
+.ac-day-dot{width:7px;height:7px;border-radius:50%;background:#222;display:inline-block;}
+.ac-day-dot.is-closed{background:#b42318;}
+.ac-day-detail{margin-top:14px;border-top:1px solid #e2e5e9;padding-top:14px;}
+.ac-day-detail-title{font-weight:700;margin-bottom:10px;}
+.ac-day-detail .schedule-item{margin-bottom:10px;}
+@media(max-width:600px){
+  .ac-cal{padding:12px 10px;}
+  .ac-cal-head strong{font-size:15px;}
+  .ac-cal-nav button{width:38px;height:38px;font-size:18px;}
+  .ac-cal-grid{gap:5px;}
+  .ac-cal-dow{font-size:11px;}
+  .ac-day{min-height:46px;font-size:13px;padding:4px 2px;min-width:0;align-items:center;justify-content:flex-start;}
+  .ac-cal-empty{min-height:46px;}
+  .ac-day-num{font-size:13px;text-align:center;}
+  .ac-day-detail{padding-top:16px;}
+  .ac-day-detail-title{font-size:16px;}
+}
+
+
+.firebase-status{position:fixed;right:18px;top:18px;z-index:1000;background:#fff;padding:8px 12px;border-radius:999px;box-shadow:0 2px 10px rgba(0,0,0,.12);font-size:12px;font-weight:600}
+.firebase-ok{color:#16803c}.firebase-ng{color:#b42318}
+
+.auth-screen{
+    position:fixed; inset:0; z-index:2000;
+    display:flex; align-items:center; justify-content:center;
+    background:#f5f6f8; padding:20px;
+}
+.auth-box{
+    width:100%; max-width:420px; background:#fff; border-radius:16px;
+    padding:28px; box-shadow:0 8px 30px rgba(0,0,0,.10);
+}
+.auth-box h1{margin:0 0 8px;font-size:24px;}
+.auth-subtitle{margin:0 0 22px;color:#666;font-size:14px;}
+.auth-box input{width:100%;padding:13px;border:1px solid #ccc;border-radius:8px;font-size:16px;}
+.auth-box label{display:block;margin:14px 0 7px;font-weight:600;}
+.auth-login-btn{width:100%;margin-top:20px;background:#222;color:#fff;border:none;border-radius:8px;padding:13px;font-size:16px;cursor:pointer;}
+.auth-login-btn:disabled{opacity:.6;cursor:default;}
+.auth-error{margin-top:14px;color:#b42318;background:#fff0f0;border-radius:8px;padding:10px;font-size:14px;display:none;}
+.auth-user{font-size:13px;font-weight:400;color:#666;display:inline-flex;gap:8px;align-items:center;margin-right:14px;}
+.auth-logout{border:1px solid #777;background:transparent;color:#fff;border-radius:6px;padding:8px 14px;cursor:pointer;}
+.bottom-actions{max-width:1000px;margin:28px auto 30px;padding:0 20px;text-align:right;}
+.bottom-logout{background:#222;color:#fff;border-color:#222;}
+.protected-ui{display:none;}
+body.authenticated .protected-ui{display:block;}
+body.authenticated .auth-screen{display:none;}
+
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+
+</head>
+
+<body>
+
+<div id="authScreen" class="auth-screen">
+  <div class="auth-box">
+    <h1>Cafe BLUE BRIDGE</h1>
+    <p class="auth-subtitle">管理画面にログインしてください</p>
+    <form id="loginForm">
+      <label for="loginEmail">メールアドレス</label>
+      <input id="loginEmail" type="email" autocomplete="username" required>
+      <label for="loginPassword">パスワード</label>
+      <input id="loginPassword" type="password" autocomplete="current-password" required>
+      <button id="loginButton" class="auth-login-btn" type="submit">ログイン</button>
+      <div id="loginError" class="auth-error"></div>
+    </form>
+  </div>
+</div>
+
+<div id="firebaseStatus" class="firebase-status protected-ui">Firebase接続確認中…</div>
+
+<div class="header protected-ui">
+    HP管理画面
+</div>
+
+<div class="container protected-ui">
+
+    <div id="mainMenu">
+        <h1>管理メニュー</h1>
+        <p class="subtitle">編集したい項目を選択してください。</p>
+
+        <div class="menu-grid">
+
+            <div class="menu-card" onclick="openEditor('schedule')">
+                <div class="menu-title">出店スケジュール</div>
+                <div class="menu-description">
+                    出店日・場所・時間を追加・編集。登録済みの場所はワンクリックで再利用
+                </div>
+            </div>
+
+            <div class="menu-card" onclick="openEditor('menu')">
+                <div class="menu-title">メニュー</div>
+                <div class="menu-description">
+                    商品名・価格・説明などを編集 
+                </div>
+            </div>
+
+            <div class="menu-card" onclick="openEditor('photo')">
+                <div class="menu-title">写真</div>
+                <div class="menu-description">
+                    HPで使用する写真を管理 
+                </div>
+            </div>
+
+            <div class="menu-card" onclick="openEditor('news')">
+                <div class="menu-title">お知らせ</div>
+                <div class="menu-description">
+                    新着情報やキャンペーンを編集 
+                </div>
+            </div>
+
+            <div class="menu-card" onclick="openEditor('shop')">
+                <div class="menu-title">店舗情報</div>
+                <div class="menu-description">
+                    営業時間・住所・連絡先などを編集 
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div id="editor" class="editor">
+
+        <h2 id="editorTitle">編集</h2>
+
+        <div id="editorContent"></div>
+
+        <div class="buttons">
+            <button class="save" onclick="saveData()">保存する</button>
+            <button class="back" onclick="closeEditor()">戻る</button>
+        </div>
+
+        <div id="message" class="message">
+            保存しました。 
+        </div>
+
+    </div>
+
+</div>
+
+<div class="bottom-actions protected-ui">
+    <span class="auth-user">ログイン中：<span id="loggedInEmail"></span></span>
+    <button id="logoutButton" class="auth-logout bottom-logout" type="button">ログアウト</button>
+</div>
+
+
+<script>
+
+let currentType = "";
+
+function openEditor(type) {
+
+    currentType = type;
+
+    document.getElementById("mainMenu").style.display = "none";
+    document.getElementById("editor").style.display = "block";
+
+    const title = document.getElementById("editorTitle");
+    const content = document.getElementById("editorContent");
+
+    document.getElementById("message").style.display = "none";
+
+    if (type === "menu") {
+
+        title.textContent = "メニュー編集 ";
+
+        content.innerHTML = `
+            <label>商品名</label>
+            <input id="field1" type="text" placeholder="例：気まぐれカレー">
+
+            <label>価格</label>
+            <input id="field2" type="text" placeholder="例：900円">
+
+            <label>説明</label>
+            <textarea id="field3" placeholder="商品の説明を入力してください"></textarea>
+        `;
+
+    }
+
+    if (type === "photo") {
+
+        title.textContent = "写真管理 ";
+
+        content.innerHTML = `
+            <label>写真</label>
+            <input id="field1" type="file" accept="image/*">
+
+            <p style="color:#777;">
+                ※現在は画面確認用です。次の段階でFirebaseに保存できるようにします。
+            </p>
+        `;
+
+    }
+
+    if (type === "news") {
+
+        title.textContent = "お知らせ編集 ";
+
+        content.innerHTML = `
+            <label>タイトル</label>
+            <input id="field1" type="text" placeholder="例：新メニューのお知らせ">
+
+            <label>内容</label>
+            <textarea id="field2" placeholder="お知らせ内容を入力してください"></textarea>
+        `;
+
+    }
+
+    if (type === "shop") {
+
+        title.textContent = "店舗情報編集 ";
+
+        content.innerHTML = `
+            <label>営業時間</label>
+            <input id="field1" type="text" placeholder="例：11:00〜20:00">
+
+            <label>住所</label>
+            <input id="field2" type="text" placeholder="住所を入力してください">
+
+            <label>電話番号</label>
+            <input id="field3" type="text" placeholder="電話番号を入力してください">
+        `;
+    }
+
+    if (type === "schedule") {
+        showScheduleList();
+        return;
+    }
+}
+
+
+function closeEditor() {
+
+    document.getElementById("editor").style.display = "none";
+    document.getElementById("mainMenu").style.display = "block";
+
+}
+
+
+function saveData() {
+    if (currentType === "schedule") {
+        saveSchedule();
+        return;
+    }
+    document.getElementById("message").style.display = "block";
+}
+
+</script>
+
+
+<script>
+
+const initialKitchenCarSchedule = [
+  {date:'2026-08-03',time:'11:00〜14:30',place:'マルキューブ（丸ビル）',address:'東京都千代田区丸の内2-4-1丸の内ビルディング',note:''},
+  {date:'2026-08-04',time:'11:30〜13:30',place:'御殿山トラストタワー（北品川）',address:'東京都品川区北品川4-7-35',note:''},
+  {date:'2026-08-05',time:'',place:'トレードビアお台場（台場）',address:'東京都港区台場2-3-1',note:''},
+  {date:'2026-08-06',time:'11:30〜14:00',place:'豊洲ONビル（豊洲）',address:'東京都江東区豊洲1丁目1',note:''},
+  {date:'2026-08-07',time:'11:30〜14:30',place:'キュープラザ原宿（神宮前）',address:'東京都渋谷区神宮前6丁目28-6',note:''},
+  {date:'2026-08-07',time:'11:30〜13:30',place:'東京堂千代田ビル［西側広場］（九段南）',address:'東京都千代田区九段南1-3-1',note:''},
+  {date:'2026-08-10',time:'11:30〜14:30',place:'マルキューブ（丸ビル）',address:'東京都千代田区丸の内2-4-1丸の内ビルディング',note:''},
+  {date:'2026-08-17',time:'11:00〜14:30',place:'マルキューブ（丸ビル）',address:'東京都千代田区丸の内2-4-1丸の内ビルディング',note:''},
+  {date:'2026-08-18',time:'11:30〜13:30',place:'御殿山トラストタワー（北品川）',address:'東京都品川区北品川4-7-35',note:''},
+  {date:'2026-08-19',time:'',place:'トレードビアお台場（台場）',address:'東京都港区台場2-3-1',note:''},
+  {date:'2026-08-20',time:'11:30〜14:00',place:'豊洲ONビル（豊洲）',address:'東京都江東区豊洲1丁目1',note:''},
+  {date:'2026-08-21',time:'11:30〜14:30',place:'キュープラザ原宿（神宮前）',address:'東京都渋谷区神宮前6丁目28-6',note:''},
+  {date:'2026-08-21',time:'11:30〜13:30',place:'東京堂千代田ビル［西側広場］（九段南）',address:'東京都千代田区九段南1-3-1',note:''},
+  {date:'2026-08-24',time:'',place:'マルキューブ（丸ビル）',address:'東京都千代田区丸の内2-4-1丸の内ビルディング',note:'丸ビルイベントの為お休み',closed:true},
+  {date:'2026-08-25',time:'11:30〜13:30',place:'御殿山トラストタワー（北品川）',address:'東京都品川区北品川4-7-35',note:''},
+  {date:'2026-08-26',time:'',place:'トレードビアお台場（台場）',address:'東京都港区台場2-3-1',note:''},
+  {date:'2026-08-27',time:'11:30〜14:00',place:'豊洲ONビル（豊洲）',address:'東京都江東区豊洲1丁目1',note:''},
+  {date:'2026-08-28',time:'11:30〜14:30',place:'キュープラザ原宿（神宮前）',address:'東京都渋谷区神宮前6丁目28-6',note:''},
+  {date:'2026-08-28',time:'11:30〜13:30',place:'東京堂千代田ビル［西側広場］（九段南）',address:'東京都千代田区九段南1-3-1',note:''},
+  {date:'2026-08-29',time:'11:00〜18:00',place:'Tokyo Got Sole2026（平和島）',address:'東京都大田区平和島6-1-1',note:''},
+  {date:'2026-08-31',time:'11:00〜14:30',place:'マルキューブ（丸ビル）',address:'東京都千代田区丸の内2-4-1丸の内ビルディング',note:''}
+];
+let scheduleEditingIndex = null;
+let scheduleDataCache = initialKitchenCarSchedule.slice();
+const FIREBASE_DB_URL = 'https://cafe-blue-bridge-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+function setFirebaseStatus(text, ok){
+  const el=document.getElementById('firebaseStatus');
+  if(!el) return;
+  el.textContent=text;
+  el.className='firebase-status '+(ok?'firebase-ok':'firebase-ng');
+}
+function getScheduleData(){ return scheduleDataCache.slice(); }
+
+async function firebaseGetSchedule(){
+  const res=await fetch(FIREBASE_DB_URL+'/schedule.json?cb='+Date.now(),{cache:'no-store'});
+  if(!res.ok) throw new Error('GET '+res.status);
+  return await res.json();
+}
+async function firebasePutSchedule(data){
+  const idToken=(typeof auth!=='undefined'&&auth.currentUser)?await auth.currentUser.getIdToken():null;
+  const url=FIREBASE_DB_URL+'/schedule.json'+(idToken?('?auth='+idToken):'');
+  const res=await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  if(!res.ok){
+    const detail=await res.text().catch(()=> '');
+    throw new Error('PUT '+res.status+' '+detail);
+  }
+  return await res.json();
+}
+
+async function loadScheduleFromFirebase(){
+  setFirebaseStatus('Firebase接続確認中…',false);
+  try{
+    const remote=await firebaseGetSchedule();
+    if(remote===null){
+      // DBが空の場合は、現在のHPに入っている予定を一度だけFirebaseへ登録。
+      scheduleDataCache=initialKitchenCarSchedule.slice();
+      await firebasePutSchedule(scheduleDataCache);
+      localStorage.setItem('cafeBlueBridgeSchedule',JSON.stringify(scheduleDataCache));
+      setFirebaseStatus('Firebase接続済み（初期データ登録済み）',true);
+    }else if(Array.isArray(remote)){
+      scheduleDataCache=remote;
+      localStorage.setItem('cafeBlueBridgeSchedule',JSON.stringify(remote));
+      setFirebaseStatus('Firebase接続済み',true);
+    }else if(typeof remote==='object'){
+      scheduleDataCache=Object.values(remote);
+      localStorage.setItem('cafeBlueBridgeSchedule',JSON.stringify(scheduleDataCache));
+      setFirebaseStatus('Firebase接続済み',true);
+    }else{
+      throw new Error('Firebaseのデータ形式が不正です');
+    }
+    if(document.getElementById('editor').style.display==='block' && currentType==='schedule') showScheduleList();
+  }catch(e){
+    console.error(e);
+    setFirebaseStatus('Firebase接続エラー',false);
+    const local=localStorage.getItem('cafeBlueBridgeSchedule');
+    if(local){try{scheduleDataCache=JSON.parse(local);}catch(_){} }
+    if(document.getElementById('mainMenu')){
+      const msg=document.getElementById('message');
+      if(msg){msg.textContent='Firebaseに接続できません。変更は保存されません。';msg.style.display='block';}
+    }
+  }
+}
+
+async function setScheduleData(data){
+  data=[...data].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  await firebasePutSchedule(data);
+  scheduleDataCache=data.slice();
+  localStorage.setItem('cafeBlueBridgeSchedule',JSON.stringify(scheduleDataCache));
+}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function formatDateJP(s){if(!s)return '';const d=new Date(s+'T00:00:00');return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;}
+function uniquePlaces(data){const map=new Map();data.forEach(x=>{if(x.place&&!map.has(x.place))map.set(x.place,{place:x.place,address:x.address||'',time:x.time||''});});return [...map.values()];}
+function openScheduleEditor(index=null,template=null){
+  currentType='schedule';document.getElementById('mainMenu').style.display='none';document.getElementById('editor').style.display='block';document.getElementById('message').style.display='none';
+  document.getElementById('editorTitle').textContent=index===null?'出店スケジュール':'出店予定を編集';scheduleEditingIndex=index;
+  const x=template||(index!==null?getScheduleData()[index]:{});const today=new Date();
+  const defaultDate=x.date||`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  document.getElementById('editorContent').innerHTML=`<div class="schedule-toolbar"><button type="button" class="small-btn" onclick="openScheduleEditor()">＋ 新しい予定</button><button type="button" class="small-btn" onclick="showScheduleList()">一覧に戻る</button></div><label>出店日</label><input id="scheduleDate" type="date" value="${esc(defaultDate)}"><label>出店場所</label><input id="schedulePlace" type="text" value="${esc(x.place||'')}" placeholder="例：マルキューブ（丸ビル）"><label>出店時間</label><input id="scheduleTime" type="text" value="${esc(x.time||'')}" placeholder="例：11:30〜14:00"><label>住所</label><input id="scheduleAddress" type="text" value="${esc(x.address||'')}" placeholder="例：東京都千代田区丸の内2-4-1"><label>補足</label><textarea id="scheduleNote" placeholder="イベント名、注意事項など">${esc(x.note||'')}</textarea><label style="display:flex;align-items:center;gap:8px;font-weight:600;"><input id="scheduleClosed" type="checkbox" ${x.closed?'checked':''} style="width:auto;">この日は出店中止・お休み</label><div class="preset-box"><strong>よく使う場所から入力</strong><div class="preset-list" id="presetList"></div></div>`;
+  renderPresets();
+}
+function renderPresets(){const el=document.getElementById('presetList');if(!el)return;const places=uniquePlaces(getScheduleData());el.innerHTML=places.length?places.map((p,i)=>`<div class="preset-row"><div><div class="preset-name">${esc(p.place)}</div><div class="schedule-meta">${esc(p.address)}${p.time?' ／ '+esc(p.time):''}</div></div><button type="button" class="small-btn primary-btn" onclick="applyPreset(${i})">この場所で追加</button></div>`).join(''):'<div class="schedule-meta">登録済みの場所はまだありません。</div>';}
+function applyPreset(i){const p=uniquePlaces(getScheduleData())[i];if(!p)return;document.getElementById('schedulePlace').value=p.place;document.getElementById('scheduleAddress').value=p.address;document.getElementById('scheduleTime').value=p.time;document.getElementById('scheduleNote').value='';document.getElementById('scheduleClosed').checked=false;}
+async function saveSchedule(){
+  const data=getScheduleData();const item={date:document.getElementById('scheduleDate').value,time:document.getElementById('scheduleTime').value.trim(),place:document.getElementById('schedulePlace').value.trim(),address:document.getElementById('scheduleAddress').value.trim(),note:document.getElementById('scheduleNote').value.trim(),closed:document.getElementById('scheduleClosed').checked};
+  if(!item.date||!item.place){alert('出店日と出店場所を入力してください。');return;}
+  if(scheduleEditingIndex===null)data.push(item);else data[scheduleEditingIndex]=item;
+  try{await setScheduleData(data);scheduleEditingIndex=null;showScheduleList();const msg=document.getElementById('message');msg.textContent='保存しました。HPを開き直すと最新情報が表示されます。';msg.style.display='block';}
+  catch(e){console.error(e);alert('Firebaseへの保存に失敗しました。\n'+e.message+'\n\nFirebaseの「ルール」が許可されているか確認してください。');}
+}
+function duplicateSchedule(index){const x=getScheduleData()[index];if(!x)return;const d=new Date(x.date+'T00:00:00');d.setDate(d.getDate()+1);const date=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;openScheduleEditor(null,{...x,date});}
+async function deleteSchedule(index){const data=getScheduleData();const x=data[index];if(!x)return;if(!confirm(`${formatDateJP(x.date)} ${x.place} を削除しますか？`))return;data.splice(index,1);try{await setScheduleData(data);showScheduleList();}catch(e){alert('削除の保存に失敗しました。\n'+e.message);}}
+let acYear=null,acMonth=null,acSelectedDate=null;
+function isCompactCal(){return window.innerWidth<=600;}
+let acResizeTimer=null;
+window.addEventListener('resize',()=>{
+  clearTimeout(acResizeTimer);
+  acResizeTimer=setTimeout(()=>{if(document.getElementById('acCalHolder'))renderAdminCalendar();},200);
+});
+function renderAdminCalendar(){
+  const data=getScheduleData();
+  const byDate={};
+  data.forEach((x,i)=>{(byDate[x.date]=byDate[x.date]||[]).push(i);});
+  const today=new Date();today.setHours(0,0,0,0);
+  const todayKey=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  if(acYear===null){
+    acYear=today.getFullYear();acMonth=today.getMonth();
+    const future=Object.keys(byDate).filter(d=>d>=todayKey).sort();
+    if(future.length){const nd=new Date(future[0]+'T00:00:00');acYear=nd.getFullYear();acMonth=nd.getMonth();}
+  }
+  const monthNames=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const dow=['日','月','火','水','木','金','土'];
+  const firstDay=new Date(acYear,acMonth,1);
+  const startWeekday=firstDay.getDay();
+  const daysInMonth=new Date(acYear,acMonth+1,0).getDate();
+  let cells='';
+  for(let i=0;i<startWeekday;i++) cells+='<div class="ac-cal-empty"></div>';
+  for(let day=1;day<=daysInMonth;day++){
+    const dateKey=`${acYear}-${String(acMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const items=byDate[dateKey]||[];
+    const hasEvent=items.length>0;
+    const hasClosed=items.some(i=>data[i].closed);
+    const classes=['ac-day'];
+    if(hasEvent) classes.push('has-event');
+    if(hasClosed) classes.push('is-closed-day');
+    if(dateKey===todayKey) classes.push('is-today');
+    if(dateKey===acSelectedDate) classes.push('is-selected');
+    let placesHtml='';
+    if(hasEvent){
+      if(isCompactCal()){
+        const dots=items.slice(0,4).map(i=>`<span class="ac-day-dot${data[i].closed?' is-closed':''}"></span>`).join('');
+        placesHtml=`<div class="ac-day-dots">${dots}</div>`;
+      }else{
+        const shown=items.slice(0,2).map(i=>{
+          const it=data[i];
+          const label=it.closed?'休み':(it.place||'');
+          return `<span class="ac-day-place">${esc(label)}</span>`;
+        }).join('');
+        const moreCount=items.length-2;
+        placesHtml=`<div class="ac-day-places">${shown}${moreCount>0?`<span class="ac-day-more">+${moreCount}件</span>`:''}</div>`;
+      }
+    }
+    cells+=`<button type="button" class="${classes.join(' ')}" onclick="selectAdminCalDay('${dateKey}')"><span class="ac-day-num">${day}</span>${placesHtml}</button>`;
+  }
+  const holder=document.getElementById('acCalHolder');
+  if(!holder) return;
+  holder.innerHTML=`<div class="ac-cal">
+    <div class="ac-cal-head">
+      <div class="ac-cal-nav"><button type="button" onclick="shiftAdminCalMonth(-1)">‹</button></div>
+      <strong>${acYear}年 ${monthNames[acMonth]}</strong>
+      <div class="ac-cal-nav"><button type="button" onclick="shiftAdminCalMonth(1)">›</button></div>
+    </div>
+    <div class="ac-cal-grid">${dow.map(d=>`<div class="ac-cal-dow">${d}</div>`).join('')}${cells}</div>
+    <div id="acDayDetail"></div>
+  </div>`;
+  renderAdminDayDetail();
+}
+function shiftAdminCalMonth(delta){
+  acMonth+=delta;
+  if(acMonth<0){acMonth=11;acYear--;}
+  if(acMonth>11){acMonth=0;acYear++;}
+  renderAdminCalendar();
+}
+function selectAdminCalDay(dateKey){
+  acSelectedDate=(acSelectedDate===dateKey)?null:dateKey;
+  renderAdminCalendar();
+}
+function renderAdminDayDetail(){
+  const el=document.getElementById('acDayDetail');
+  if(!el) return;
+  if(!acSelectedDate){el.innerHTML='';return;}
+  const data=getScheduleData();
+  const entries=data.map((x,i)=>({...x,_i:i})).filter(x=>x.date===acSelectedDate);
+  el.innerHTML=`<div class="ac-day-detail">
+    <div class="ac-day-detail-title">${esc(formatDateJP(acSelectedDate))}</div>
+    ${entries.length?entries.map(x=>`<div class="schedule-item"><div class="schedule-place">${esc(x.place)}${x.closed?'<span class="closed-badge">お休み</span>':''}</div><div class="schedule-meta">${x.time?`時間：${esc(x.time)}<br>`:''}住所：${esc(x.address||'')}${x.note?`<br>補足：${esc(x.note)}`:''}</div><div class="schedule-actions"><button type="button" class="small-btn" onclick="openScheduleEditor(${x._i})">編集</button><button type="button" class="small-btn primary-btn" onclick="duplicateSchedule(${x._i})">この予定を複製</button><button type="button" class="small-btn danger-btn" onclick="deleteSchedule(${x._i})">削除</button></div></div>`).join(''):'<p class="schedule-meta">この日の予定はまだありません。</p>'}
+    <div class="schedule-toolbar"><button type="button" class="small-btn primary-btn" onclick="openScheduleEditor(null,{date:'${acSelectedDate}'})">＋ この日に追加</button></div>
+  </div>`;
+}
+function showScheduleList(){
+  currentType='schedule';scheduleEditingIndex=null;document.getElementById('mainMenu').style.display='none';document.getElementById('editor').style.display='block';document.getElementById('editorTitle').textContent='出店スケジュール';
+  const data=getScheduleData();
+  document.getElementById('editorContent').innerHTML=`<div class="schedule-toolbar"><button type="button" class="small-btn primary-btn" onclick="openScheduleEditor()">＋ 出店予定を追加</button></div><div id="acCalHolder"></div><p class="schedule-meta">登録済み ${data.length} 件。カレンダーの日付をタップすると、その日の予定をすぐに確認・編集・追加できます。</p><div class="schedule-list">${data.map((x,i)=>`<div class="schedule-item"><div class="schedule-date">${esc(formatDateJP(x.date))}${x.closed?'<span class="closed-badge">お休み</span>':''}</div><div class="schedule-place">${esc(x.place)}</div><div class="schedule-meta">${x.time?`時間：${esc(x.time)}<br>`:''}住所：${esc(x.address||'')}${x.note?`<br>補足：${esc(x.note)}`:''}</div><div class="schedule-actions"><button type="button" class="small-btn" onclick="openScheduleEditor(${i})">編集</button><button type="button" class="small-btn primary-btn" onclick="duplicateSchedule(${i})">この予定を複製</button><button type="button" class="small-btn danger-btn" onclick="deleteSchedule(${i})">削除</button></div></div>`).join('')}</div><div class="preset-box"><strong>よく使う場所</strong><p class="schedule-meta">登録済みの場所をワンクリックで新しい予定に入力できます。</p><div class="preset-list">${uniquePlaces(data).map((p,i)=>`<div class="preset-row"><div><div class="preset-name">${esc(p.place)}</div><div class="schedule-meta">${esc(p.address)}${p.time?' ／ '+esc(p.time):''}</div></div><button type="button" class="small-btn primary-btn" onclick="openScheduleEditor(null,${JSON.stringify(p).replace(/</g,'\\u003c')})">この場所で追加</button></div>`).join('')}</div></div>`;
+  renderAdminCalendar();
+}
+
+</script>
+
+<script>
+// Firebase Authentication: 管理者ログイン制御
+const firebaseConfig = {
+  apiKey: "AIzaSyCNGOS777VAnvTbbMo0vDCpY8qwrZ0lt1M",
+  authDomain: "cafe-blue-bridge.firebaseapp.com",
+  databaseURL: "https://cafe-blue-bridge-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "cafe-blue-bridge",
+  storageBucket: "cafe-blue-bridge.firebasestorage.app",
+  messagingSenderId: "323347885659",
+  appId: "1:323347885659:web:d7de752ef87afd518c997e"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+const loginForm = document.getElementById("loginForm");
+const loginButton = document.getElementById("loginButton");
+const loginError = document.getElementById("loginError");
+const logoutButton = document.getElementById("logoutButton");
+const loggedInEmail = document.getElementById("loggedInEmail");
+
+function showLoginError(message){
+  loginError.textContent = message;
+  loginError.style.display = "block";
+}
+
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  loginError.style.display = "none";
+  loginButton.disabled = true;
+  loginButton.textContent = "ログイン中…";
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (error) {
+    let message = "ログインできませんでした。メールアドレスとパスワードを確認してください。";
+    if (error && error.code === "auth/too-many-requests") message = "試行回数が多すぎます。少し時間を置いてから再度お試しください。";
+    showLoginError(message);
+    loginButton.disabled = false;
+    loginButton.textContent = "ログイン";
+  }
+});
+
+logoutButton.addEventListener("click", async () => {
+  await auth.signOut();
+});
+
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    document.body.classList.add("authenticated");
+    loggedInEmail.textContent = user.email || "";
+    loginButton.disabled = false;
+    loginButton.textContent = "ログイン";
+    loadScheduleFromFirebase();
+  } else {
+    document.body.classList.remove("authenticated");
+    loggedInEmail.textContent = "";
+    document.getElementById("mainMenu").style.display = "block";
+    document.getElementById("editor").style.display = "none";
+  }
+});
+</script>
+</body>
+</html>
