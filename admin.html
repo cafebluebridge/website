@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HP管 理 画 面 </title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    background: #f5f6f8;
+    color: #222;
+}
+
+.header {
+    background: #222;
+    color: white;
+    padding: 20px 24px;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.subtitle {
+    margin-bottom: 25px;
+    color: #666;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.menu-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    transition: 0.2s;
+}
+
+.menu-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.menu-title {
+    font-size: 19px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.menu-description {
+    color: #777;
+    font-size: 14px;
+}
+
+.editor {
+    display: none;
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin-top: 25px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+.editor h2 {
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    margin-top: 18px;
+    margin-bottom: 7px;
+    font-weight: bold;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    font-size: 16px;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.buttons {
+    margin-top: 25px;
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    border: none;
+    border-radius: 7px;
+    padding: 12px 20px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.save {
+    background: #222;
+    color: white;
+}
+
+.back {
+    background: #e8e8e8;
+    color: #222;
+}
+
+.message {
+    margin-top: 15px;
+    color: #388e3c;
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .menu-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .container {
+        margin-top: 20px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    HP管 理 画 面 
+</div>
+
+<div class="container">
+
+    <div id="mainMenu">
+        <h1>管 理 メ ニ ュ ー </h1>
+        <p class="subtitle">編 集 し た い 項 目 を 選 択 し て く だ さ い 。 </p>
+
+        <div class="menu-grid">
+
+            <div class="menu-card" onclick="openEditor('top')">
+                <div class="icon">� � </div>
+                <div class="menu-title">ト ッ プ ペ ー ジ </div>
+                <div class="menu-description">
+                    メ イ ン タ イ ト ル や 紹 介 文 を 編 集 
+                </div>
+            </div>
+
+            <div class="menu-card" onclick="openEditor('menu')">
+                <div class="icon">� � </div>
+                <div class="menu-title">メ ニ ュ ー </div>
+                <div class="menu-description">
+                    商 品 名 ・ 価 格 ・ 説 明 な ど を 編 集 
+                </div>
+            </div>
+
+            <div class="menu-card" onclick="openEditor('photo')">
+                <div class="icon">� � ️ </div>
+                <div class="menu-title">写 真 </div>
+                <div class="menu-description">
+                    HPで 使 用 す る 写 真 を 管 理 
+                </div>
+            </div>
+
+            <div class="menu-card" onclick="openEditor('news')">
+                <div class="icon">� � </div>
+                <div class="menu-title">お 知 ら せ </div>
+                <div class="menu-description">
+                    新 着 情 報 や キ ャ ン ペ ー ン を 編 集 
+                </div>
+            </div>
+
+            <div class="menu-card" onclick="openEditor('shop')">
+                <div class="icon">� � </div>
+                <div class="menu-title">店 舗 情 報 </div>
+                <div class="menu-description">
+                    営 業 時 間 ・ 住 所 ・ 連 絡 先 な ど を 編 集 
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div id="editor" class="editor">
+
+        <h2 id="editorTitle">編 集 </h2>
+
+        <div id="editorContent"></div>
+
+        <div class="buttons">
+            <button class="save" onclick="saveData()">保 存 す る </button>
+            <button class="back" onclick="closeEditor()">戻 る </button>
+        </div>
+
+        <div id="message" class="message">
+            保 存 し ま し た 。 
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+let currentType = "";
+
+function openEditor(type) {
+
+    currentType = type;
+
+    document.getElementById("mainMenu").style.display = "none";
+    document.getElementById("editor").style.display = "block";
+
+    const title = document.getElementById("editorTitle");
+    const content = document.getElementById("editorContent");
+
+    document.getElementById("message").style.display = "none";
+
+    if (type === "top") {
+
+        title.textContent = "ト ッ プ ペ ー ジ 編 集 ";
+
+        content.innerHTML = `
+            <label>メ イ ン タ イ ト ル </label>
+            <input id="field1" type="text" placeholder="例 ： ○ ○ カ レ ー ">
+
+            <label>紹 介 文 </label>
+            <textarea id="field2" placeholder="お 店 の 紹 介 文 を 入 力 し て く だ さ い "></textarea>
+        `;
+
+    }
+
+    if (type === "menu") {
+
+        title.textContent = "メ ニ ュ ー 編 集 ";
+
+        content.innerHTML = `
+            <label>商 品 名 </label>
+            <input id="field1" type="text" placeholder="例 ： 気 ま ぐ れ カ レ ー ">
+
+            <label>価 格 </label>
+            <input id="field2" type="text" placeholder="例 ： 900円 ">
+
+            <label>説 明 </label>
+            <textarea id="field3" placeholder="商 品 の 説 明 を 入 力 し て く だ さ い "></textarea>
+        `;
+
+    }
+
+    if (type === "photo") {
+
+        title.textContent = "写 真 管 理 ";
+
+        content.innerHTML = `
+            <label>写 真 </label>
+            <input id="field1" type="file" accept="image/*">
+
+            <p style="color:#777;">
+                ※ 現 在 は 画 面 確 認 用 で す 。 次 の 段 階 で Firebaseに 保 存 で き る よ う に し ま す 。 
+            </p>
+        `;
+
+    }
+
+    if (type === "news") {
+
+        title.textContent = "お 知 ら せ 編 集 ";
+
+        content.innerHTML = `
+            <label>タ イ ト ル </label>
+            <input id="field1" type="text" placeholder="例 ： 新 メ ニ ュ ー の お 知 ら せ ">
+
+            <label>内 容 </label>
+            <textarea id="field2" placeholder="お 知 ら せ 内 容 を 入 力 し て く だ さ い "></textarea>
+        `;
+
+    }
+
+    if (type === "shop") {
+
+        title.textContent = "店 舗 情 報 編 集 ";
+
+        content.innerHTML = `
+            <label>営 業 時 間 </label>
+            <input id="field1" type="text" placeholder="例 ： 11:00〜 20:00">
+
+            <label>住 所 </label>
+            <input id="field2" type="text" placeholder="住 所 を 入 力 し て く だ さ い ">
+
+            <label>電 話 番 号 </label>
+            <input id="field3" type="text" placeholder="電 話 番 号 を 入 力 し て く だ さ い ">
+        `;
+    }
+}
+
+
+function closeEditor() {
+
+    document.getElementById("editor").style.display = "none";
+    document.getElementById("mainMenu").style.display = "block";
+
+}
+
+
+function saveData() {
+
+    document.getElementById("message").style.display = "block";
+
+}
+
+</script>
+
+</body>
+</html>
